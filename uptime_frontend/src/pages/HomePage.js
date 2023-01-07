@@ -54,7 +54,7 @@ const HomePage = () => {
     const interval = setInterval(() => {
       urlshistoryList()
       console.log("create Hiistory")
-    }, 6000);
+    }, 60000);
     return () => clearInterval(interval)
     
   },[])
