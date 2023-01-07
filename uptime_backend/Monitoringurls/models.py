@@ -25,7 +25,7 @@ class urlslist(models.Model):
 class urlshistory(models.Model):
     id = models.AutoField(primary_key=True)
     urlslist = models.ForeignKey(urlslist, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.CharField( max_length=100,    )
     updated_at = models.DateTimeField(auto_now=True)
 
     ACTIVE = 'ACTIVE'
@@ -45,7 +45,7 @@ class urlshistory(models.Model):
 class deletedurls(models.Model):
     id = models.AutoField(primary_key=True)
     url_name = models.URLField(max_length=200,)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.CharField( max_length=100,    )
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
     def __str__(self):

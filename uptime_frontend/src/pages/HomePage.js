@@ -54,7 +54,7 @@ const HomePage = () => {
     const interval = setInterval(() => {
       urlshistoryList()
       console.log("create Hiistory")
-    }, 60000);
+    }, 6000);
     return () => clearInterval(interval)
     
   },[])
@@ -123,7 +123,7 @@ const HomePage = () => {
         setCount(data.count)
         //console.log(data.next)
         //console.log(data.next[data.next.length - 1])
-        console.log(Number(data.next[data.next.length - 1]) )
+        //console.log(Number(data.next[data.next.length - 1]) )
         //Next.current=data.next[data.next.length - 1]
         //Previous.current=Number(data.next[data.next.length - 1]) -1
     }
@@ -218,7 +218,7 @@ const HomePage = () => {
       <div className="urllist">
         {searchedurls && urlslist.map((url) => (
           <div className="urllist-container">
-            <h3 className="urllist-h3" key={url.id} onClick={() => urlHistory(url.url_name)}><p className="urllist-p" >{url.url_name}</p> 
+            <h3 className="urllist-h3" key={url.id} onClick={() => {urlHistory(url.url_name); setHidehistory(true)}}><p className="urllist-p" >{url.url_name}</p> 
               <button className="urllist-delete-btn" value="delete" onClick={() => deleteUrlHistory(url.url_name)}> delete </button>
             </h3>
           </div>
