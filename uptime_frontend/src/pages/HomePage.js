@@ -12,22 +12,20 @@ const HomePage = () => {
   let [searchedurls, setSearchedurls] =useState(true)
   let Previous = useRef(1)
   let Next = useRef(2)
-  let [previousactive, setPreviousactive] = useState(true)
-  let [nextactive, setNextactive] = useState(null)
+  let previousactive = useRef(true)
+  let nextactive = useRef(null)
   let [yoururlstitle, setYoururlstitle] =useState("Searched URL list")
   let [count, setCount] = useState(0)
-  let [hidehistory, setHidehistory] = useState(true)
+  let [hidehistory, setHidehistory] = useState(null)
 
 
   
 
   let {authTokens, searchurl, yoururls, deletedlist, deletedurls} = useContext(AuthContext)
 
-  console.log(urlshistory.length)
   let searchUrl = async (e) =>{
         
     e.preventDefault();
-    console.log('searching url status');
     let response = await fetch('http://127.0.0.1:8000/create/', {
         method:'POST',
         headers:{
@@ -41,11 +39,12 @@ const HomePage = () => {
     if(response.status === 201){       
         setTypeurl(data.url_name)
         setUrlstatus(data.status)
-        console.log(data)
+
     }
     else{
       setTypeurl("website not available")
-      alert('something went wrong')
+      setUrlstatus("Invalid input")
+      
     }
   }
 
@@ -53,7 +52,6 @@ const HomePage = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       urlshistoryList()
-      console.log("create Hiistory")
     }, 60000);
     return () => clearInterval(interval)
     
@@ -72,8 +70,6 @@ const HomePage = () => {
       })   
       
       let data = await response.json()
-      console.log(data)
-      //setUrlshistory(data)
   } 
 
 
@@ -94,20 +90,15 @@ const HomePage = () => {
       })   
       
       let data = await response.json()
-      console.log(data)
       setUrlslist(data)
   } 
 
 
   let urlHistory = async (url) =>{
         
-    //e.preventDefault();
-    console.log('searching url history');
-    console.log(url);
     setHistoryurl(url)
-    console.log(nextactive)
-    console.log(previousactive)
-    let response = await fetch('http://127.0.0.1:8000/history/?page='+ (previousactive ?Previous.current:Next.current ), {
+
+    let response = await fetch('http://127.0.0.1:8000/history/?page='+ (previousactive.current ? Previous.current:"") +(nextactive.current ? Next.current:""), {
         method:'POST',
         headers:{
             'Content-Type':'application/json',
@@ -119,13 +110,7 @@ const HomePage = () => {
     
     if(response.status === 200){       
         setUrlshistory(data.results)
-        console.log(data.count)
         setCount(data.count)
-        //console.log(data.next)
-        //console.log(data.next[data.next.length - 1])
-        //console.log(Number(data.next[data.next.length - 1]) )
-        //Next.current=data.next[data.next.length - 1]
-        //Previous.current=Number(data.next[data.next.length - 1]) -1
     }
     else{
       alert('something went wrong')
@@ -134,9 +119,6 @@ const HomePage = () => {
 
   let deleteUrlHistory = async (url) =>{
         
-    //e.preventDefault();
-    console.log('deleting history');
-    console.log(url);
     let response = await fetch('http://127.0.0.1:8000/urlslist/', {
         method:'DELETE',
         headers:{
@@ -148,9 +130,7 @@ const HomePage = () => {
     let data = await response.json()
     
     if(response.status === 200){       
-        //setHistory(data.url_name)
         searchedUrls()
-        console.log(data)
     }
     else{
       alert('something went wrong')
@@ -161,36 +141,37 @@ const HomePage = () => {
   let activeUrls = ()=> {
     setActiveurls(true)
     setSearchedurls(null)
+    setHidehistory(null)
     setYoururlstitle("Active Urls")
   }
 
   let searchUrls = ()=> {
     setActiveurls(null)
     setSearchedurls(true)
+    setHidehistory(null)
     setYoururlstitle("Searched URL list")
   }
 
   let previousActive =()=> {
-    setPreviousactive(true)
+    previousactive.current=true
+    nextactive.current=null
     if(Previous.current>1){
-      console.log("yes")
-      Previous.current = Number(Next.current) - 1
+      
+      Previous.current = Number(Previous.current) - 1
       Next.current = Number(Next.current) - 1
     }
 
-    console.log(Next.current)
-    console.log(Previous.current)
     urlHistory(historyurl)
   }
 
   let nextActive =() =>{
-    setPreviousactive(null)
+    previousactive.current=null
+    nextactive.current=true
     if(Next.current<(Number(count)/10)){
       Next.current = Number(Next.current) + 1
     Previous.current = Number(Next.current) - 1
     }
-    console.log(Next.current)
-    console.log(Previous.current)
+
     urlHistory(historyurl)
   }
   
@@ -218,21 +199,21 @@ const HomePage = () => {
       <div className="urllist">
         {searchedurls && urlslist.map((url) => (
           <div className="urllist-container">
-            <h3 className="urllist-h3" key={url.id} onClick={() => {urlHistory(url.url_name); setHidehistory(true)}}><p className="urllist-p" >{url.url_name}</p> 
+            <h3 className="urllist-h3" key={url.id} onClick={() => { Previous.current = 1; Next.current=2;previousactive.current=true; nextactive.current=null; setHidehistory(true); urlHistory(url.url_name);}}><p className="urllist-p" >{url.url_name}</p> 
               <button className="urllist-delete-btn" value="delete" onClick={() => deleteUrlHistory(url.url_name)}> delete </button>
             </h3>
           </div>
         ))}
 
-      {hidehistory&&(<>{activeurls && urlslist.filter(url => url.status.includes('ACTIVE'))  .map((url) => (
+            {activeurls && urlslist.filter(url => url.status.includes('ACTIVE'))  .map((url) => (
                 <div className="urllist-container">
-                  <h3 className="urllist-h3" key={url.id} onClick={() => urlHistory(url.url_name)}><p className="urllist-p" >{url.url_name}</p> 
+                  <h3 className="urllist-h3" key={url.id} onClick={() => {Previous.current = 1; Next.current=2;previousactive.current=true; nextactive.current=null;setHidehistory(true); urlHistory(url.url_name)}}><p className="urllist-p" >{url.url_name}</p> 
                     <button className="urllist-delete-btn" value="delete" onClick={() => deleteUrlHistory(url.url_name)}> delete </button>
                   </h3>
                 </div>
               ))}
 
-            <div>
+              {hidehistory&&(<><div><h1>History</h1>
               {(urlshistory.length !=0) && urlshistory.map((url) => (
                 
                   <p className="urllist-h3" key={url.id}>{historyurl} &nbsp;&nbsp;{url.status} &nbsp;&nbsp; {url.created_at}
@@ -246,10 +227,10 @@ const HomePage = () => {
                     <button  onClick={previousActive}>previous</button> &nbsp;&nbsp;&nbsp;&nbsp;
                     <button onClick={nextActive}>next</button>
                   </div>
-                  <button  onClick={()=>setHidehistory(null)}>Hide history</button>
+                  
                 </>)
               }
-              
+              <button  onClick={()=>setHidehistory(null)}>Hide history</button>
             </div></>)}
                       
       </div>

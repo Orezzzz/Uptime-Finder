@@ -10,7 +10,6 @@ const PrivateRoutes = () => {
     
     return( !authTokens ? <Navigate to="/login" /> : <Outlet />
     )
-    //auth ? <Outlet /> : <Navigate to="/login" />;
 }
 
 export default PrivateRoutes

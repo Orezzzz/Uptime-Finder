@@ -18,13 +18,13 @@ const SignupPage = () => {
             <hr />
 
             <label htmlFor="usernmae"><b>Username</b></label>
-            <input type="text" placeholder="Enter Email" name="username" required />
+            <input type="text" placeholder="Enter Username" name="username" required />
 
             <label htmlFor="email"><b>Email</b></label>
-            <input type="text" placeholder="Enter Email" name="email" required />
+            <input type="email" placeholder="Enter Email" name="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$" required />
 
             <label htmlFor="psw"><b>Password</b></label>
-            <input type="password" placeholder="Enter Password" name="password" required />
+            <input type="password" placeholder="Enter Password(minimum characters-8)" name="password" pattern=".{8,}" title="Eight or more characters" required />
 
             <div>
               <button type="submit" className='signupbtn'>Sign Up</button>

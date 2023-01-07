@@ -23,7 +23,6 @@ from Monitoringurls.pagination import StandardResultsSetPagination
 def get_urls(request):
     if request.method == 'GET':
         user = request.user
-        print(user)
         Urlslist = urlslist.objects.filter(user_id=user)
         serializer = urlslistSerializer(Urlslist, many=True)
         for x in Urlslist:
@@ -32,10 +31,7 @@ def get_urls(request):
 
     if request.method == 'DELETE':
         data = request.data
-        user = request.user
-        print(user)
-        print(user.id)
-        
+        user = request.user     
         
         url = urlslist.objects.get(url_name=data['url_name'], user_id=user)
         
@@ -44,9 +40,9 @@ def get_urls(request):
             "user_id": user.id,
             "created_at": str(datetime.datetime.now())
         }
-        print(context)
+
         serializer = deletedurlsSerializer(data = context)
-        print(serializer)
+
         if serializer.is_valid():
             serializer.save()
 
@@ -61,11 +57,10 @@ def get_urls(request):
 def get_deleted_urls(request):
     if request.method == 'GET':
         user = request.user
-        print(user)
+
         urls = deletedurls.objects.filter(user_id=user)
         serializer = deletedurlsSerializer(urls, many=True)
-        for x in urls:
-            print(x)
+
         return JsonResponse(serializer.data, safe=False)
 
 
@@ -79,16 +74,13 @@ def get_urls_history(request):
         paginator = StandardResultsSetPagination()
         user = request.user
         data = request.data
-        print(data['url_name'])
+
         Urlshistory = urlshistory.objects.filter(urlslist__url_name=data['url_name'],)
+
         result_page = paginator.paginate_queryset(Urlshistory, request)
         #Urlshistory = urlshistory.objects.filter(urlslist__user_id= user, urlslist__url_name=data['url_name'])
         serializer = urlshistorySerializer(result_page, many=True)
         
-
-        print(result_page)
-        #for x in urlshistory:
-         #   print(requests.get(x).status_code)
         return paginator.get_paginated_response(serializer.data)
 
 
@@ -107,14 +99,12 @@ class urlCreateView(APIView):
 
     def post(self, request, *args, **kwargs):
         data = request.data
-        print(data["url_name"])
+
         user = request.user
-        print(user.id)
-                 
         
         try:
             response = requests.get(data["url_name"]).status_code
-            print(response)
+
             if (response >=200 and response <= 226):
                 status="ACTIVE"
             else:
@@ -132,7 +122,7 @@ class urlCreateView(APIView):
         serializer = self.serializer_class(data=context)
 
         if serializer.is_valid():
-            print(user.id)
+
             if not urlslist.objects.filter(user_id =user.id, url_name=data["url_name"]).exists():
                 print("saved")
                 serializer.save()
@@ -154,26 +144,22 @@ class urlCreateHistory(APIView):
         return Response(data=serializer.data, status=200)
 
     def post(self, request, *args, **kwargs):
-       # data = request.data
-        #print(data["url_name"])
+
         user = request.user
-        print(user.id)
 
         urls = urlslist.objects.all()
-        #print(urls)
+
         for url in urls:
-            #print(str(url) +" - "+ str(url.id))   
-            
-            response = requests.get(url).status_code
-            #print(response)
-            if (response >=200 and response <= 226):
+
+            response = requests.get(str(url)).status_code
+        
+            if (response == 200):
                 status="ACTIVE"
             else:
                 status="DOWN"
 
             current_time = datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
-            print(current_time)
-            
+
             context={
             "created_at":str(current_time),
             "updated_at":str(current_time),
@@ -181,10 +167,7 @@ class urlCreateHistory(APIView):
             "urlslist": url.id
             }
 
-            
             serializer = self.serializer_class(data=context)
-            print(serializer)
-
 
             if serializer.is_valid():
                 serializer.save()
@@ -197,14 +180,6 @@ class urlCreateHistory(APIView):
             "urlslist": ""
 
         }
-       # serializer = self.serializer_class(data=context)
 
-        #if serializer.is_valid():
-         #   print(user.id)
-          #  if not urlslist.objects.filter(user_id =user.id, url_name=data["url_name"]).exists():
-           #     print("saved")
-            #    serializer.save()
-            #else:
-             #   print("not saved")
             
         return Response(data=serializer.data, status=201)    

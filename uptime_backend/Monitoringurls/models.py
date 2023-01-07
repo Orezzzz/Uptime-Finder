@@ -20,7 +20,7 @@ class urlslist(models.Model):
     )
 
     def __str__(self):
-        return "%s %s" % (self.url_name,self.user_id)
+        return self.url_name
 
 class urlshistory(models.Model):
     id = models.AutoField(primary_key=True)
